@@ -25,10 +25,11 @@ function App() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [progRes, toiletsRes, leaderRes] = await Promise.all([
-        axios.get('/api/toilets/my-progress'),
-        axios.get('/api/toilets'),
-        axios.get('/api/toilets/leaderboard')
+const [progRes, toiletsRes, leaderRes] = await Promise.all([
+  axios.get(`${API_URL}/api/toilets/my-progress`),
+  axios.get(`${API_URL}/api/toilets`),
+  axios.get(`${API_URL}/api/toilets/leaderboard`)
+]);
       ]);
       setProgress(progRes.data);
       setToilets(toiletsRes.data);
