@@ -5,7 +5,7 @@ import ToiletList from './components/ToiletList';
 import './App.css';
 
 // Replace with your actual Render backend URL
-const API_URL = 'https://toilet-tracker-backend.onrender.com';
+const API_URL = 'https://toilet-tracker-backend-1.onrender.com';
 
 function App() {
   const [user, setUser] = useState(null);
