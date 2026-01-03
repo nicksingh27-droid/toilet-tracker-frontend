@@ -23,13 +23,13 @@ function App() {
   const [manualLon, setManualLon] = useState('');
   const [manualAddress, setManualAddress] = useState('');
 
-  useEffect(() => {
-    axios.defaults.baseURL = API_URL;
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchData();
-    }
-  }, [token]);
+useEffect(() => {
+  axios.defaults.baseURL = API_URL;
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    fetchData();
+  }
+}, [token, fetchData]);  // ← Add fetchData here
 
   const fetchData = async () => {
     try {
