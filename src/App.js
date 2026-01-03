@@ -30,7 +30,7 @@ const [progRes, toiletsRes, leaderRes] = await Promise.all([
   axios.get(`${API_URL}/api/toilets`),
   axios.get(`${API_URL}/api/toilets/leaderboard`)
 ]);
-      ]);
+
       setProgress(progRes.data);
       setToilets(toiletsRes.data);
       setLeaderboard(leaderRes.data);
