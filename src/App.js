@@ -4,7 +4,6 @@ import ToiletMap from './components/Map';
 import ToiletList from './components/ToiletList';
 import './App.css';
 
-// Replace with your actual Render backend URL
 const API_URL = 'https://toilet-tracker-backend-1.onrender.com';
 
 function App() {
@@ -17,19 +16,27 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Manual entry fields
   const [manualName, setManualName] = useState('');
   const [manualLat, setManualLat] = useState('');
   const [manualLon, setManualLon] = useState('');
   const [manualAddress, setManualAddress] = useState('');
 
+  // Set base URL on mount
+  useEffect(() => {
+    axios.defaults.baseURL = API_URL;
+  }, []);
+
   const fetchData = useCallback(async () => {
+    if (!token) return;
+    
     try {
-const [progRes, toiletsRes, leaderRes] = await Promise.all([
-  axios.get(`${API_URL}/api/toilets/my-progress`),
-  axios.get(`${API_URL}/api/toilets`),
-  axios.get(`${API_URL}/api/toilets/leaderboard`)
-]);
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      const [progRes, toiletsRes, leaderRes] = await Promise.all([
+        axios.get('/api/toilets/my-progress', { headers }),
+        axios.get('/api/toilets', { headers }),
+        axios.get('/api/toilets/leaderboard', { headers })
+      ]);
 
       setProgress(progRes.data);
       setToilets(toiletsRes.data);
@@ -42,14 +49,14 @@ const [progRes, toiletsRes, leaderRes] = await Promise.all([
       }
     } catch (err) {
       console.error('Fetch error:', err);
-      logout();
+      if (err.response?.status === 401) {
+        logout();
+      }
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
-    axios.defaults.baseURL = API_URL;
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchData();
     }
   }, [token, fetchData]);
@@ -75,8 +82,6 @@ const [progRes, toiletsRes, leaderRes] = await Promise.all([
   const handleSuccessfulAuth = (newToken) => {
     setToken(newToken);
     localStorage.setItem('token', newToken);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-    fetchData();
   };
 
   const logCurrentLocation = () => {
@@ -101,6 +106,8 @@ const [progRes, toiletsRes, leaderRes] = await Promise.all([
             latitude: lat,
             longitude: lon,
             address: 'Auto-detected via GPS'
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
           });
           setMessage('🚽 Toilet logged successfully!');
           fetchData();
@@ -133,6 +140,8 @@ const [progRes, toiletsRes, leaderRes] = await Promise.all([
         latitude: parseFloat(manualLat),
         longitude: parseFloat(manualLon),
         address: manualAddress || 'Manual entry'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setMessage('🚽 Manual toilet logged!');
       setManualName('');
@@ -154,7 +163,6 @@ const [progRes, toiletsRes, leaderRes] = await Promise.all([
     setLeaderboard([]);
     setMessage('');
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
   };
 
   if (!user) {
