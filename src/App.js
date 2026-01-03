@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import ToiletMap from './components/Map';
 import ToiletList from './components/ToiletList';
 import './App.css';
 
-// CHANGE THIS TO YOUR LIVE RENDER BACKEND URL
+// Replace with your actual Render backend URL
 const API_URL = 'https://toilet-tracker-backend.onrender.com';
 
 function App() {
@@ -23,15 +23,7 @@ function App() {
   const [manualLon, setManualLon] = useState('');
   const [manualAddress, setManualAddress] = useState('');
 
-useEffect(() => {
-  axios.defaults.baseURL = API_URL;
-  if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    fetchData();
-  }
-}, [token, fetchData]);  // ← Add fetchData here
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [progRes, toiletsRes, leaderRes] = await Promise.all([
         axios.get('/api/toilets/my-progress'),
@@ -51,7 +43,15 @@ useEffect(() => {
       console.error('Fetch error:', err);
       logout();
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    axios.defaults.baseURL = API_URL;
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      fetchData();
+    }
+  }, [token, fetchData]);
 
   const login = async (email, password) => {
     try {
@@ -158,54 +158,54 @@ useEffect(() => {
 
   if (!user) {
     return (
-      <div className="App">
+      <div className="App" style={{ textAlign: 'center', padding: '40px' }}>
         <h1>🚽 Toilet Tracker</h1>
         <h2>Join the race to 400 unique toilets</h2>
-<form
-  onSubmit={(e) => {
-    e.preventDefault();  // ← THIS LINE IS CRITICAL — stops page reload
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
-    if (email && password) {
-      login(email, password);
-    } else {
-      alert('Please enter both email and password');
-    }
-  }}
->
-  <input
-    type="email"
-    name="email"
-    placeholder="Email"
-    required
-    style={{ padding: '12px', margin: '10px 0', width: '320px', fontSize: '1em' }}
-  />
-  <br />
-  <input
-    type="password"
-    name="password"
-    placeholder="Password"
-    required
-    style={{ padding: '12px', margin: '10px 0', width: '320px', fontSize: '1em' }}
-  />
-  <br />
-  <button
-    type="submit"
-    style={{
-      padding: '15px 40px',
-      fontSize: '1.3em',
-      background: '#4CAF50',
-      color: 'white',
-      border: 'none',
-      borderRadius: '10px',
-      cursor: 'pointer',
-      marginTop: '30px'
-    }}
-  >
-    Login or Sign Up
-  </button>
-</form>
-        <p style={{ marginTop: '30px', fontSize: '1.1em' }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const email = e.target.email.value.trim();
+            const password = e.target.password.value;
+            if (email && password) {
+              login(email, password);
+            } else {
+              alert('Please enter email and password');
+            }
+          }}
+        >
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+            style={{ padding: '12px', margin: '10px 0', width: '320px', fontSize: '1em' }}
+          />
+          <br />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+            style={{ padding: '12px', margin: '10px 0', width: '320px', fontSize: '1em' }}
+          />
+          <br />
+          <button
+            type="submit"
+            style={{
+              padding: '15px 40px',
+              fontSize: '1.3em',
+              background: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              marginTop: '30px'
+            }}
+          >
+            Login or Sign Up
+          </button>
+        </form>
+        <p style={{ marginTop: '30px' }}>
           New here? Just enter any email & password — it will create your account automatically!
         </p>
       </div>
@@ -213,7 +213,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="App">
+    <div className="App" style={{ padding: '20px' }}>
       <h1>🚽 Toilet Tracker</h1>
       <p>
         Welcome back! <button onClick={logout}>Logout</button>
