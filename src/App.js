@@ -360,7 +360,7 @@ function App() {
               e.target.style.color = '#00d4ff';
             }}
           >
-            ⬅️ Extract
+            ⬅️ Log Out
           </button>
         </div>
 
