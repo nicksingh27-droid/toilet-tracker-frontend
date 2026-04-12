@@ -11,6 +11,7 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [progress, setProgress] = useState(null);
   const [toilets, setToilets] = useState([]);
+  const [allToiletsForMap, setAllToiletsForMap] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [mapCenter, setMapCenter] = useState([51.505, -0.09]);
   const [loading, setLoading] = useState(false);
@@ -31,15 +32,17 @@ function App() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       
-      const [progRes, toiletsRes, leaderRes] = await Promise.all([
+      const [progRes, toiletsRes, leaderRes, allToiletsRes] = await Promise.all([
         axios.get('/api/toilets/my-progress', { headers }),
         axios.get('/api/toilets', { headers }),
-        axios.get('/api/toilets/leaderboard', { headers })
+        axios.get('/api/toilets/leaderboard', { headers }),
+        axios.get('/api/toilets/all', { headers })
       ]);
 
       setProgress(progRes.data);
       setToilets(toiletsRes.data);
       setLeaderboard(leaderRes.data);
+      setAllToiletsForMap(allToiletsRes.data);
       setUser({ loggedIn: true });
 
       if (toiletsRes.data.length > 0) {
@@ -360,7 +363,7 @@ function App() {
               e.target.style.color = '#00d4ff';
             }}
           >
-            ⬅️ Log Out
+            Log Out
           </button>
         </div>
 
@@ -673,7 +676,7 @@ function App() {
           }}>
             🗺️ Conquest Map
           </h2>
-          <ToiletMap center={mapCenter} toilets={toilets} />
+          <ToiletMap center={mapCenter} toilets={allToiletsForMap} currentUserId={user?._id} />
         </div>
 
         {/* Toilet List */}
