@@ -21,6 +21,7 @@ function App() {
   const [manualLat, setManualLat] = useState('');
   const [manualLon, setManualLon] = useState('');
   const [manualAddress, setManualAddress] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
     axios.defaults.baseURL = API_URL;
@@ -64,6 +65,7 @@ function App() {
   }, [token, fetchData]);
 
   const login = async (email, password) => {
+    setLoginLoading(true);
     try {
       const res = await axios.post('/api/auth/login', { email, password });
       handleSuccessfulAuth(res.data.token);
@@ -73,9 +75,11 @@ function App() {
           const signupRes = await axios.post('/api/auth/signup', { email, password });
           handleSuccessfulAuth(signupRes.data.token);
         } catch (signupErr) {
+          setLoginLoading(false);
           alert('Signup failed: ' + (signupErr.response?.data?.message || 'Error'));
         }
       } else {
+        setLoginLoading(false);
         alert('Login failed: ' + (err.response?.data?.message || 'Error'));
       }
     }
@@ -266,33 +270,59 @@ function App() {
             />
             <button
               type="submit"
+              disabled={loginLoading}
               style={{
                 width: '100%',
                 padding: '18px',
                 marginTop: '20px',
-                background: 'linear-gradient(135deg, #00d4ff, #00ffff)',
+                background: loginLoading ? '#555' : 'linear-gradient(135deg, #00d4ff, #00ffff)',
                 color: '#0d1620',
                 border: 'none',
                 borderRadius: '10px',
                 fontSize: '1.3em',
                 fontWeight: '700',
-                cursor: 'pointer',
+                cursor: loginLoading ? 'not-allowed' : 'pointer',
                 textTransform: 'uppercase',
                 letterSpacing: '2px',
                 fontFamily: "'Bebas Neue', cursive",
                 boxShadow: '0 8px 20px rgba(0, 212, 255, 0.4)',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                position: 'relative',
+                overflow: 'hidden'
               }}
               onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-3px)';
-                e.target.style.boxShadow = '0 12px 30px rgba(0, 212, 255, 0.6)';
+                if (!loginLoading) {
+                  e.target.style.transform = 'translateY(-3px)';
+                  e.target.style.boxShadow = '0 12px 30px rgba(0, 212, 255, 0.6)';
+                }
               }}
               onMouseOut={(e) => {
                 e.target.style.transform = 'translateY(0)';
                 e.target.style.boxShadow = '0 8px 20px rgba(0, 212, 255, 0.4)';
               }}
             >
-              🎯 Deploy
+              {loginLoading ? (
+                <>
+                  <span style={{ opacity: 0.7 }}>🎯 Deploying...</span>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    height: '4px',
+                    background: 'linear-gradient(90deg, #00d4ff, #00ffff)',
+                    animation: 'loadingBar 1.5s ease-in-out infinite',
+                    width: '100%'
+                  }} />
+                  <style>{`
+                    @keyframes loadingBar {
+                      0% { transform: translateX(-100%); }
+                      100% { transform: translateX(100%); }
+                    }
+                  `}</style>
+                </>
+              ) : (
+                '🎯 Deploy'
+              )}
             </button>
           </form>
           <p style={{
